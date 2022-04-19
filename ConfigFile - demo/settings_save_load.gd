@@ -20,9 +20,6 @@ export var standart_config = {
 		{"master_volume":0}
 }
 
-func _ready() -> void:
-	standart_config = config_load()
-
 func config_load():
 	config_file = ConfigFile.new()
 	var data = standart_config
