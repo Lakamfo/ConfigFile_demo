@@ -2,10 +2,10 @@ extends Node
 
 var config_file = ConfigFile.new()
 
-onready var file_path = OS.get_user_data_dir() + "/" + config_name + "." + config_extension
-
 export var config_name = "cfg"
 export var config_extension = "txt"
+
+onready var file_path = OS.get_user_data_dir() + "/" + config_name + "." + config_extension
 
 #ENG - you can add everething in this dictionary;RUS - в этот словарь можно добавить все, что угодно
 export var standart_config = {
