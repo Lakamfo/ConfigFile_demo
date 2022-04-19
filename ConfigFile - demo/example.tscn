@@ -1,0 +1,221 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://sounds/demo_loop_t1.ogg" type="AudioStream" id=1]
+[ext_resource path="res://sounds/demo_loop_t0.ogg" type="AudioStream" id=2]
+[ext_resource path="res://sounds/demo_loop_t2.ogg" type="AudioStream" id=3]
+[ext_resource path="res://sounds/demo_loop_t3.ogg" type="AudioStream" id=4]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Spatial
+
+onready var environment = $env
+onready var fps_L = $Panel/container/Label
+
+func _ready() -> void:
+	example_load(settings_save_load.config_load())
+
+func _process(delta: float) -> void:
+	fps_L.text = \"FPS: \" +str(Performance.get_monitor(Performance.TIME_FPS))+\"(\"+str(stepify(delta,0.001))+\")\"
+
+#GovnoKod zone
+
+func example_load(data: Dictionary):
+	environment.environment.ssao_enabled = data.video_graphics.ssao
+	OS.vsync_enabled = data.video_graphics.vsync
+	get_viewport().msaa = data.video_graphics.msaa
+	get_viewport().fxaa = data.video_graphics.fxaa
+	AudioServer.set_bus_volume_db(0,data.audio_settings.master_volume)
+	
+	$Panel/container/vsync.pressed = data.video_graphics.vsync
+	$Panel/container/ssao.pressed = data.video_graphics.ssao
+	$Panel/container/fxaa.pressed = data.video_graphics.fxaa
+	$Panel/container/msaa.selected = data.video_graphics.msaa
+	$Panel/container/volume.value = data.audio_settings.master_volume
+
+func _on_Button_pressed() -> void:
+	settings_save_load.config_save()
+	example_load(settings_save_load.config_load())
+
+
+func _on_vsync_toggled(button_pressed: bool) -> void:
+	settings_save_load.standart_config.video_graphics.vsync = button_pressed
+
+
+func _on_ssao_toggled(button_pressed: bool) -> void:
+	settings_save_load.standart_config.video_graphics.ssao = button_pressed
+
+
+func _on_fxaa_toggled(button_pressed: bool) -> void:
+	settings_save_load.standart_config.video_graphics.fxaa = button_pressed
+
+
+func _on_msaa_item_selected(index: int) -> void:
+	settings_save_load.standart_config.video_graphics.msaa = index
+
+
+func _on_volume_value_changed(value: float) -> void:
+	settings_save_load.standart_config.audio_settings.master_volume = value
+"
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Spatial
+
+export var mouse_sens = 0.01
+
+func _input(event):
+	if event is InputEventMouseMotion:
+		rotate_y(-event.relative.x * mouse_sens)
+		rotate_x(-event.relative.y * mouse_sens)
+		rotation.x = clamp(rotation.x,deg2rad(-81),deg2rad(81))
+		rotation_degrees.z = 0
+"
+
+[sub_resource type="ProceduralSky" id=6]
+sky_top_color = Color( 0.815686, 0.854902, 0.87451, 1 )
+sky_horizon_color = Color( 0.94902, 0.878431, 0.760784, 1 )
+ground_bottom_color = Color( 0.74902, 0.74902, 0.74902, 1 )
+ground_horizon_color = Color( 0.933333, 0.933333, 0.933333, 1 )
+
+[sub_resource type="Environment" id=7]
+background_mode = 2
+background_sky = SubResource( 6 )
+ambient_light_color = Color( 1, 1, 1, 1 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.121569, 1, 0.52549, 1 )
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 0, 0.623529, 1, 1 )
+
+[sub_resource type="SpatialMaterial" id=5]
+albedo_color = Color( 1, 0, 0, 1 )
+roughness = 0.46
+
+[node name="example" type="Spatial"]
+script = SubResource( 2 )
+
+[node name="camera_joint" type="Spatial" parent="."]
+script = SubResource( 1 )
+
+[node name="camera" type="Camera" parent="camera_joint"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4 )
+
+[node name="env" type="WorldEnvironment" parent="."]
+environment = SubResource( 7 )
+
+[node name="CSGCombiner" type="CSGCombiner" parent="."]
+
+[node name="CSGBox" type="CSGBox" parent="CSGCombiner"]
+width = 1.28663
+height = 0.346689
+material = SubResource( 3 )
+
+[node name="CSGBox2" type="CSGBox" parent="CSGCombiner"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.459781, 0.339656, 0 )
+width = 1.09322
+height = 0.346689
+depth = 1.15037
+material = SubResource( 4 )
+
+[node name="CSGBox3" type="CSGBox" parent="CSGCombiner"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.459781, 0.684546, -0.692286 )
+width = 1.09322
+height = 0.346689
+depth = 1.15037
+material = SubResource( 5 )
+
+[node name="CSGSphere" type="CSGSphere" parent="CSGCombiner"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.349732, 0, 0 )
+
+[node name="CSGSphere2" type="CSGSphere" parent="CSGCombiner"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.32337, 0.137498, -1.49026 )
+operation = 2
+
+[node name="sounds" type="Spatial" parent="."]
+
+[node name="loop_0" type="AudioStreamPlayer3D" parent="sounds"]
+stream = ExtResource( 2 )
+unit_size = 2.0
+autoplay = true
+
+[node name="loop_1" type="AudioStreamPlayer3D" parent="sounds"]
+stream = ExtResource( 1 )
+unit_size = 2.0
+autoplay = true
+
+[node name="loop_2" type="AudioStreamPlayer3D" parent="sounds"]
+stream = ExtResource( 3 )
+unit_size = 2.0
+autoplay = true
+
+[node name="loop_3" type="AudioStreamPlayer3D" parent="sounds"]
+stream = ExtResource( 4 )
+unit_size = 2.0
+autoplay = true
+
+[node name="Panel" type="Panel" parent="."]
+margin_right = 178.0
+margin_bottom = 214.0
+
+[node name="container" type="VBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="Panel/container"]
+margin_right = 178.0
+margin_bottom = 14.0
+text = "FPS:"
+
+[node name="reload" type="Button" parent="Panel/container"]
+margin_top = 18.0
+margin_right = 178.0
+margin_bottom = 38.0
+text = "RELOAD SETTINGS"
+
+[node name="vsync" type="CheckButton" parent="Panel/container"]
+margin_top = 42.0
+margin_right = 178.0
+margin_bottom = 82.0
+text = "VSYNC"
+
+[node name="ssao" type="CheckButton" parent="Panel/container"]
+margin_top = 86.0
+margin_right = 178.0
+margin_bottom = 126.0
+text = "SSAO"
+
+[node name="fxaa" type="CheckButton" parent="Panel/container"]
+margin_top = 130.0
+margin_right = 178.0
+margin_bottom = 170.0
+text = "FXAA"
+
+[node name="msaa" type="OptionButton" parent="Panel/container"]
+margin_top = 174.0
+margin_right = 178.0
+margin_bottom = 194.0
+text = "MSAA disable"
+items = [ "MSAA disable", null, false, 0, null, "MSAA 2X", null, false, 1, null, "MSAA 4X", null, false, 2, null, "MSAA 8X", null, false, 3, null ]
+selected = 0
+
+[node name="volume" type="HSlider" parent="Panel/container"]
+margin_top = 198.0
+margin_right = 178.0
+margin_bottom = 214.0
+min_value = -72.0
+max_value = 0.0
+
+[node name="Label" type="Label" parent="Panel/container/volume"]
+modulate = Color( 1, 1, 1, 0.407843 )
+margin_left = 58.0
+margin_top = 2.0
+margin_right = 113.0
+margin_bottom = 16.0
+text = "VOLUME"
+
+[connection signal="pressed" from="Panel/container/reload" to="." method="_on_Button_pressed"]
+[connection signal="toggled" from="Panel/container/vsync" to="." method="_on_vsync_toggled"]
+[connection signal="toggled" from="Panel/container/ssao" to="." method="_on_ssao_toggled"]
+[connection signal="toggled" from="Panel/container/fxaa" to="." method="_on_fxaa_toggled"]
+[connection signal="item_selected" from="Panel/container/msaa" to="." method="_on_msaa_item_selected"]
+[connection signal="value_changed" from="Panel/container/volume" to="." method="_on_volume_value_changed"]
