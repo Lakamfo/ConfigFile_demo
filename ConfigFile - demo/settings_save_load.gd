@@ -20,11 +20,11 @@ export var standart_config = {
 		{"master_volume":0}
 }
 
-func config_load():
+func config_load(path: String = file_path):
 	config_file = ConfigFile.new()
 	var data = standart_config
 	
-	config_file.load(file_path)
+	config_file.load(path)
 	
 	for section in config_file.get_sections():
 		for parameter in config_file.get_section_keys(section):
@@ -32,12 +32,12 @@ func config_load():
 	
 	return data
 
-func config_save(settings: Dictionary = standart_config):
+func config_save(settings: Dictionary = standart_config, path: String = file_path):
 	config_file = ConfigFile.new()
 	
 	for section in settings.keys():
 		for parameter in settings.get(section):
 			config_file.set_value(section,parameter,settings.get(section).get(parameter))
 	
-	config_file.save(file_path)
-	#OS.shell_open(file_path)
+	config_file.save(path)
+	#OS.shell_open(path)
