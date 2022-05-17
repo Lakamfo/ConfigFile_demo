@@ -40,4 +40,4 @@ func config_save(settings: Dictionary = standart_config):
 			config_file.set_value(section,parameter,settings.get(section).get(parameter))
 	
 	config_file.save(file_path)
-	#OS.shell_open(OS.get_user_data_dir())
+	#OS.shell_open(file_path)
